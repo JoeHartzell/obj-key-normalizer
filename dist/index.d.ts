@@ -3,73 +3,73 @@
  */
 export declare type Case = 'kebab' | 'snake' | 'camel';
 /**
- * serialization options
+ * normalization options
  */
-export interface IOptions {
+export interface INormalizerOptions {
     case?: Case;
     deep?: boolean;
 }
 /**
- * an interface for serializing objects
+ * the result of a normalization
  */
-export interface ISerializer {
-    /**
-     * serializes any object to a new object
-     *
-     * NOTE: does not mutate the original data
-     * @param data the data to serialize
-     */
-    serialize<TSource extends object, TResult>(data: TSource): ISerializerResult<TResult | TResult[] | null>;
-}
-/**
- * the result of a serialization
- */
-export interface ISerializerResult<TResult> {
+export interface INormalizationResult<TResult> {
     result: TResult;
     errors?: any;
 }
 /**
- * serializer to convert objects to another object
+ * an interface for normalizing objects
  */
-export declare class Serializer implements ISerializer {
-    options: IOptions;
+export interface INormalizer {
     /**
-     * creates a new serializer instance
-     * @constructor
-     * @param options serializers options
-     */
-    constructor(options?: IOptions);
-    /**
-     * serializes any object to a new object.
+     * normalizes any object to a new object
      *
      * NOTE: does not mutate the original data
-     * @param data the data to serialize
+     * @param data the data to normalize
      */
-    serialize<TSource extends object, TResult>(data: TSource | TSource[]): ISerializerResult<TResult | TResult[] | null>;
+    normalize<TSource extends object, TResult>(data: TSource): INormalizationResult<TResult | TResult[] | null>;
+}
+/**
+ * normalizer to convert objects to another object
+ */
+export declare class Normalizer implements INormalizer {
+    options: INormalizerOptions;
     /**
-     * serializes an array of objects to a new array of objects
-     * @param data the array to serialize
+     * creates a new normalizer instance
+     * @constructor
+     * @param options normalizes options
      */
-    private serializeArray;
+    constructor(options?: INormalizerOptions);
     /**
-     * serializes an object to a new object
-     * @param data the object to serialize
+     * normalizes any object to a new object.
+     *
+     * NOTE: does not mutate the original data
+     * @param data the data to normailze
      */
-    private serializeObject;
+    normalize<TSource extends object, TResult>(data: TSource | TSource[]): INormalizationResult<TResult | TResult[] | null>;
     /**
-     * serializes non-object data
-     * @param data data to serialize
+     * normalizes an array of objects to a new array of objects
+     * @param data the array to normalize
      */
-    private serializePrimitiveType;
+    private normalizedArray;
     /**
-     * serializes a property from a source object to a destination object.
+     * normalizes an object to a new object
+     * @param data the object to normalize
+     */
+    private normalizeObject;
+    /**
+     * normalizes non-object data
+     * @param data data to normalize
+     */
+    private normalizePrimitiveType;
+    /**
+     * normalize a property from a source object to a destination object.
      *
      * NOTE: mutates the dest object
      * @param source source object
      * @param key source key
      * @param dest destination object
      */
-    private serializeProperty;
+    private normalizeProperty;
     /**
      * re-cases a string to a new case
      * @param value value to re-case

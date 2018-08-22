@@ -6,160 +6,160 @@ import * as _ from 'lodash';
 export type Case = 'kebab' | 'snake' | 'camel';
 
 /**
- * serialization options
+ * normalization options
  */
-export interface IOptions {
+export interface INormalizerOptions {
     case?: Case;
     deep?: boolean;
 }
 
 /**
- * an interface for serializing objects
+ * the result of a normalization
  */
-export interface ISerializer {
-    /**
-     * serializes any object to a new object
-     *
-     * NOTE: does not mutate the original data
-     * @param data the data to serialize
-     */
-    serialize<TSource extends object, TResult>(data: TSource): ISerializerResult<TResult | TResult[] | null>;
-}
-
-/**
- * the result of a serialization
- */
-export interface ISerializerResult<TResult> {
+export interface INormalizationResult<TResult> {
     result: TResult;
     errors?: any;
 }
 
 /**
- * serializer to convert objects to another object
+ * an interface for normalizing objects
  */
-export class Serializer implements ISerializer {
+export interface INormalizer {
     /**
-     * creates a new serializer instance
+     * normalizes any object to a new object
+     *
+     * NOTE: does not mutate the original data
+     * @param data the data to normalize
+     */
+    normalize<TSource extends object, TResult>(data: TSource): INormalizationResult<TResult | TResult[] | null>;
+}
+
+/**
+ * normalizer to convert objects to another object
+ */
+export class Normalizer implements INormalizer {
+    /**
+     * creates a new normalizer instance
      * @constructor
-     * @param options serializers options
+     * @param options normalizes options
      */
     constructor(
-        public options: IOptions = {},
+        public options: INormalizerOptions = {},
     ) { }
 
     /**
-     * serializes any object to a new object.
+     * normalizes any object to a new object.
      *
      * NOTE: does not mutate the original data
-     * @param data the data to serialize
+     * @param data the data to normailze
      */
-    public serialize<TSource extends object, TResult>(data: TSource | TSource[]): ISerializerResult<TResult | TResult[] | null> {
+    public normalize<TSource extends object, TResult>(data: TSource | TSource[]): INormalizationResult<TResult | TResult[] | null> {
         const errors: any = {};
-        let serialized: ISerializerResult<TResult | TResult[] | null> | null = null;
+        let normalized: INormalizationResult<TResult | TResult[] | null> | null = null;
         let result: TResult | TResult[] | null = null;
 
         // check if the data is an array
         if (_.isArray(data)) {
-            serialized = this.serializeArray<TSource, TResult>(data);
+            normalized = this.normalizedArray<TSource, TResult>(data);
         }
         // check if the data is an object
         else if (_.isObject(data)) {
-            serialized = this.serializeObject<TSource, TResult>(data);
+            normalized = this.normalizeObject<TSource, TResult>(data);
         }
         // data must be a primitive type
         else {
-            serialized = this.serializePrimitiveType<TSource, TResult>(data);
+            normalized = this.normalizePrimitiveType<TSource, TResult>(data);
         }
 
-        // if there are errors, we assume the serialization failed
-        if (serialized && !_.isEmpty(serialized.errors)) {
-            _.merge(serialized.errors, errors);
+        // if there are errors, we assume the normalization failed
+        if (normalized && !_.isEmpty(normalized.errors)) {
+            _.merge(normalized.errors, errors);
         }
-        // other wise we make sure the serialized result exists
-        else if (serialized.result) {
-            result = serialized.result;
+        // other wise we make sure the normalized result exists
+        else if (normalized.result) {
+            result = normalized.result;
         }
 
-        // return the serialization result
+        // return the normalized result
         return { result, errors };
     }
 
     /**
-     * serializes an array of objects to a new array of objects
-     * @param data the array to serialize
+     * normalizes an array of objects to a new array of objects
+     * @param data the array to normalize
      */
-    private serializeArray<TSource extends object, TResult>(data: TSource[]): ISerializerResult<TResult[] | null> {
+    private normalizedArray<TSource extends object, TResult>(data: TSource[]): INormalizationResult<TResult[] | null> {
         const initial: any = [];
         const errors: any = {};
 
         // reduce the data in the array
         const result = data.reduce((acc: any, value: TSource) => {
-            // serialize the current value in the array
-            const serialized = this.serialize<TSource, TResult>(value);
+            // normalize the current value in the array
+            const normalized = this.normalize<TSource, TResult>(value);
 
-            // if there are errors we assume the serialization failed
-            if (serialized.errors && serialized.result === null) {
-                _.merge(errors, serialized.errors);
+            // if there are errors we assume the normalization failed
+            if (normalized.errors && normalized.result === null) {
+                _.merge(errors, normalized.errors);
             }
             // if there is a result, we need to push it to the accumulator
-            else if (serialized.result != null) {
-                acc.push(serialized.result);
+            else if (normalized.result != null) {
+                acc.push(normalized.result);
             }
 
             // return the accumulator
             return acc;
         }, initial);
 
-        // return the serialized result
+        // return the normalized result
         return { result, errors };
     }
 
     /**
-     * serializes an object to a new object
-     * @param data the object to serialize
+     * normalizes an object to a new object
+     * @param data the object to normalize
      */
-    private serializeObject<TSource extends object, TResult>(data: TSource): ISerializerResult<TResult | null> {
+    private normalizeObject<TSource extends object, TResult>(data: TSource): INormalizationResult<TResult | null> {
         const result =
             Object
                 .keys(data)
                 .reduce((acc: any, key) => {
-                    // serialize each key of the object to the dest object
-                    this.serializeProperty(data, key, acc);
+                    // normalize each key of the object to the dest object
+                    this.normalizeProperty(data, key, acc);
                     // return the dest object
                     return acc;
                 }, {});
-        // return the serialized result
+        // return the normalized result
         return { result };
     }
 
     /**
-     * serializes non-object data
-     * @param data data to serialize
+     * normalizes non-object data
+     * @param data data to normalize
      */
-    private serializePrimitiveType<TSource, TResult>(data: TSource): ISerializerResult<TResult> {
-        // primitive types can't actually be serialized
+    private normalizePrimitiveType<TSource, TResult>(data: TSource): INormalizationResult<TResult> {
+        // primitive types can't actually be normalized
         // so we just need to cast it to any and return it
         return { result: data as any};
     }
 
     /**
-     * serializes a property from a source object to a destination object.
+     * normalize a property from a source object to a destination object.
      *
      * NOTE: mutates the dest object
      * @param source source object
      * @param key source key
      * @param dest destination object
      */
-    private serializeProperty<T extends object>(source: T, key: string, dest: object) {
+    private normalizeProperty<T extends object>(source: T, key: string, dest: object) {
         // source value
         const srcValue = _.get(source, key);
         // destination key
         const destKey = this.recase(key, this.options.case);
 
         // if options.deep == true and the source value is an object
-        // the dest property needs to be a serialized array
+        // the dest property needs to be a normalized
         if (_.isObject(srcValue) && this.options.deep) {
-            _.set(dest, destKey, this.serialize(srcValue).result);
+            _.set(dest, destKey, this.normalize(srcValue).result);
         }
         // just set the dest property to source value
         else {

@@ -1,10 +1,10 @@
 import * as mocha from 'mocha';
 import * as chai from 'chai';
 import { describe } from 'mocha';
-import { Serializer } from '../src';
+import { Normalizer } from '../lib';
 
-describe('serializer', () => {
-    describe('serialize object', () => {
+describe('normalizer', () => {
+    describe('normalize object', () => {
         const objectData = {
             id: 1, 
             'first-name': 'Joe',
@@ -19,7 +19,7 @@ describe('serializer', () => {
         }
 
         it('should not modify nested objects when deep is set to false', () => {
-            const serializer = new Serializer({
+            const normalizer = new Normalizer({
                 case: 'camel',
                 deep: false,
             });
@@ -35,20 +35,20 @@ describe('serializer', () => {
                     'line2': 'P.O. Box 19',
                 }
             }
-            const serialized = serializer.serialize<typeof objectData, typeof expectedResult>(objectData);
+            const normalized = normalizer.normalize<typeof objectData, typeof expectedResult>(objectData);
 
-            chai.expect(serialized.result).to.deep.eq(expectedResult);
+            chai.expect(normalized.result).to.deep.eq(expectedResult);
         })
 
         it('should return new object with same keys and values, when no options are configured', () => {
-            const serializer = new Serializer();
-            const serialized = serializer.serialize<typeof objectData, typeof objectData>(objectData);
+            const normalizer = new Normalizer();
+            const normalized = normalizer.normalize<typeof objectData, typeof objectData>(objectData);
     
-            chai.expect(serialized.result).to.deep.eq(objectData);
+            chai.expect(normalized.result).to.deep.eq(objectData);
         })
 
         it('should convert all keys to camel case when the camel case option is configured', () => {
-            const serializer = new Serializer({ 
+            const normalizer = new Normalizer({ 
                 case: 'camel',
                 deep: true
             });
@@ -64,13 +64,13 @@ describe('serializer', () => {
                     'line2': 'P.O. Box 19',
                 }
             };
-            const serialized = serializer.serialize<typeof objectData, typeof expectedResult>(objectData);
+            const normalized = normalizer.normalize<typeof objectData, typeof expectedResult>(objectData);
 
-            chai.expect(serialized.result).to.deep.eq(expectedResult);
+            chai.expect(normalized.result).to.deep.eq(expectedResult);
         })
 
         it('should convert all keys to kebab when the kebab case option is configured', () => {
-            const serializer = new Serializer({
+            const normalizer = new Normalizer({
                 case: 'kebab', 
                 deep: true,
             })
@@ -86,13 +86,13 @@ describe('serializer', () => {
                     'line-2': 'P.O. Box 19',
                 }
             }
-            const result = serializer.serialize<typeof objectData, typeof expectedResult>(objectData);
+            const result = normalizer.normalize<typeof objectData, typeof expectedResult>(objectData);
 
             chai.expect(result.result).to.deep.eq(expectedResult);
         })
 
         it('should convert all keys to snake case when the snake case option is configured', () => {
-            const serializer = new Serializer({
+            const normalizer = new Normalizer({
                 case: 'snake',
                 deep: true
             });
@@ -108,13 +108,13 @@ describe('serializer', () => {
                     'line_2': 'P.O. Box 19',
                 }
             };
-            const serialized = serializer.serialize<typeof objectData, typeof expectedResult>(objectData);
+            const normalized = normalizer.normalize<typeof objectData, typeof expectedResult>(objectData);
 
-            chai.expect(serialized.result).to.deep.eq(expectedResult);
+            chai.expect(normalized.result).to.deep.eq(expectedResult);
         })
     })
 
-    describe('serialize array', () => {
+    describe('normalize array', () => {
         it('should work with mixed type arrays', () => {
             const data = [
                 { first_name: 'Joe' }, 3
@@ -122,11 +122,11 @@ describe('serializer', () => {
             const expected = [
                 { 'first-name': 'Joe' }, 3
             ];
-            const serializer = new Serializer({
+            const normalizer = new Normalizer({
                 case: 'kebab',
                 deep: true,
             });
-            const result = serializer.serialize(data);
+            const result = normalizer.normalize(data);
 
             chai.expect(result.result).to.deep.eq(expected);
         })
@@ -138,11 +138,11 @@ describe('serializer', () => {
             const expected = [
                 { 'first-name': 'Joe' }, { 'first-name': 'Joe' }, { 'first-name': 'Joe' }
             ];
-            const serializer = new Serializer({
+            const normalizer = new Normalizer({
                 case: 'kebab',
                 deep: true,
             });
-            const result = serializer.serialize(data);
+            const result = normalizer.normalize(data);
 
             chai.expect(result.result).to.deep.eq(expected);
         })
@@ -168,11 +168,11 @@ describe('serializer', () => {
                     [{ 'first-name': 'Joe' }, { 'first-name': 'Joe' }]   
                 ]
             ];
-            const serializer = new Serializer({
+            const normalizer = new Normalizer({
                 case: 'kebab',
                 deep: true,
             });
-            const result = serializer.serialize(data3d);
+            const result = normalizer.normalize(data3d);
 
             chai.expect(result.result).to.deep.eq(expected3dResult);
         })
