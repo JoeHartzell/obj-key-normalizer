@@ -1,8 +1,9 @@
 {
   "name": "obj-key-normalizer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Deeply normalizes object keys.",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "directories": {
     "test": "tests"
   },
