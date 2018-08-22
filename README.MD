@@ -17,9 +17,9 @@ const options = {
     deep: true,
     case: 'kebab',
 }
-const serializer = new Serializer(options);
+const normalizer = new Normalizer(options);
 
-const dest = serializer.serialize(source);
+const dest = normalizer.Normalize(source);
 
 // dest object output
 // {
