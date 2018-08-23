@@ -31,7 +31,7 @@ export interface INormalizer {
      * NOTE: does not mutate the original data
      * @param data the data to normalize
      */
-    normalize<TSource extends object, TResult>(data: TSource): INormalizationResult<TResult | TResult[] | null>;
+    normalize<TIn>(data: TIn): INormalizationResult<any | null>;
 }
 
 /**
@@ -53,22 +53,22 @@ export class Normalizer implements INormalizer {
      * NOTE: does not mutate the original data
      * @param data the data to normailze
      */
-    public normalize<TIn, TOut>(data: TIn): INormalizationResult<TOut | null> {
+    public normalize<TIn>(data: TIn): INormalizationResult<any> {
         const errors: any = {};
-        let normalized: INormalizationResult<TOut | null> | null = null;
-        let result: TOut | null = null;
+        let normalized: INormalizationResult<any> | null = null;
+        let result: any = null;
 
         // check if the data is an array
         if (_.isArray(data)) {
-            normalized = this.normalizedArray<TIn, TOut>(data);
+            normalized = this._normalizedArray<TIn>(data);
         }
         // check if the data is an object
         else if (_.isObject(data)) {
-            normalized = this.normalizeObject<TIn, TOut>(data);
+            normalized = this._normalizeObject<TIn>(data);
         }
         // data must be a primitive type
         else {
-            normalized = this.normalizePrimitiveType<TIn, TOut>(data);
+            normalized = this._normalizePrimitiveType<TIn>(data);
         }
 
         // if there are errors, we assume the normalization failed
@@ -88,15 +88,15 @@ export class Normalizer implements INormalizer {
      * normalizes an array of objects to a new array of objects
      * @param data the array to normalize
      */
-    private normalizedArray<TIn, TOut>(data: TIn): INormalizationResult<TOut | null> {
+    private _normalizedArray<TIn>(data: TIn): INormalizationResult<any> {
         const initial: any = [];
         const errors: any = {};
 
         if (_.isArray(data)) {
             // reduce the data in the array
-            const result: TOut = data.reduce((acc: any, value: TIn) => {
+            const result: any = data.reduce((acc: any, value: TIn) => {
                 // normalize the current value in the array
-                const normalized = this.normalize<typeof value, TOut>(value);
+                const normalized = this.normalize<typeof value>(value);
 
                 // if there are errors we assume the normalization failed
                 if (normalized.errors && normalized.result === null) {
@@ -127,28 +127,37 @@ export class Normalizer implements INormalizer {
      * normalizes an object to a new object
      * @param data the object to normalize
      */
-    private normalizeObject<TIn, TOut>(data: TIn): INormalizationResult<TOut | null> {
-        const result =
-            Object
-                .keys(data)
-                .reduce((acc: any, key) => {
-                    // normalize each key of the object to the dest object
-                    this.normalizeProperty(data, key, acc);
-                    // return the dest object
-                    return acc;
-                }, {});
-        // return the normalized result
-        return { result };
+    private _normalizeObject<TIn>(data: TIn): INormalizationResult<any> {
+        if (_.isObject(data)) {
+            const result =
+                Object
+                    .keys(data)
+                    .reduce((acc: any, key) => {
+                        // normalize each key of the object to the dest object
+                        this.normalizeProperty(data, key, acc);
+                        // return the dest object
+                        return acc;
+                    }, {});
+            // return the normalized result
+            return { result };
+        }
+
+        return {
+            errors: {
+                data: 'data was not an object but was trying to be normalized as an object',
+            },
+            result: null,
+        };
     }
 
     /**
      * normalizes non-object data
      * @param data data to normalize
      */
-    private normalizePrimitiveType<TSource, TResult>(data: TSource): INormalizationResult<TResult> {
-        // primitive types can't actually be normalized
-        // so we just need to cast it to any and return it
-        return { result: data as any};
+    private _normalizePrimitiveType<TIn>(data: TIn): INormalizationResult<any> {
+        // primitive types can't actually be normalized (for now)
+        // so we just need to return it
+        return { result: data };
     }
 
     /**
@@ -159,16 +168,15 @@ export class Normalizer implements INormalizer {
      * @param key source key
      * @param dest destination object
      */
-    private normalizeProperty<T>(source: T, key: string, dest: object) {
+    private normalizeProperty<TIn>(source: TIn, key: string, dest: object) {
         // source value
         const srcValue = _.get(source, key);
         // destination key
         const destKey = this.recase(key, this.options.case);
 
-        // if options.deep == true and the source value is an object
-        // the dest property needs to be a normalized
-        if (_.isObject(srcValue) && this.options.deep) {
-            _.set(dest, destKey, this.normalize(srcValue).result);
+        // if options.deep == true the dest property needs to be a normalized
+        if (this.options.deep) {
+            _.set(dest, destKey, this.normalize<typeof srcValue>(srcValue).result);
         }
         // just set the dest property to source value
         else {

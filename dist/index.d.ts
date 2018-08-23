@@ -26,7 +26,7 @@ export interface INormalizer {
      * NOTE: does not mutate the original data
      * @param data the data to normalize
      */
-    normalize<TSource extends object, TResult>(data: TSource): INormalizationResult<TResult | TResult[] | null>;
+    normalize<TIn>(data: TIn): INormalizationResult<any | null>;
 }
 /**
  * normalizer to convert objects to another object
@@ -45,22 +45,22 @@ export declare class Normalizer implements INormalizer {
      * NOTE: does not mutate the original data
      * @param data the data to normailze
      */
-    normalize<TIn, TOut>(data: TIn): INormalizationResult<TOut | null>;
+    normalize<TIn>(data: TIn): INormalizationResult<any>;
     /**
      * normalizes an array of objects to a new array of objects
      * @param data the array to normalize
      */
-    private normalizedArray;
+    private _normalizedArray;
     /**
      * normalizes an object to a new object
      * @param data the object to normalize
      */
-    private normalizeObject;
+    private _normalizeObject;
     /**
      * normalizes non-object data
      * @param data data to normalize
      */
-    private normalizePrimitiveType;
+    private _normalizePrimitiveType;
     /**
      * normalize a property from a source object to a destination object.
      *

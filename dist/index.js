@@ -32,15 +32,15 @@ class Normalizer {
         let result = null;
         // check if the data is an array
         if (_.isArray(data)) {
-            normalized = this.normalizedArray(data);
+            normalized = this._normalizedArray(data);
         }
         // check if the data is an object
         else if (_.isObject(data)) {
-            normalized = this.normalizeObject(data);
+            normalized = this._normalizeObject(data);
         }
         // data must be a primitive type
         else {
-            normalized = this.normalizePrimitiveType(data);
+            normalized = this._normalizePrimitiveType(data);
         }
         // if there are errors, we assume the normalization failed
         if (normalized && !_.isEmpty(normalized.errors)) {
@@ -57,7 +57,7 @@ class Normalizer {
      * normalizes an array of objects to a new array of objects
      * @param data the array to normalize
      */
-    normalizedArray(data) {
+    _normalizedArray(data) {
         const initial = [];
         const errors = {};
         if (_.isArray(data)) {
@@ -90,25 +90,33 @@ class Normalizer {
      * normalizes an object to a new object
      * @param data the object to normalize
      */
-    normalizeObject(data) {
-        const result = Object
-            .keys(data)
-            .reduce((acc, key) => {
-            // normalize each key of the object to the dest object
-            this.normalizeProperty(data, key, acc);
-            // return the dest object
-            return acc;
-        }, {});
-        // return the normalized result
-        return { result };
+    _normalizeObject(data) {
+        if (_.isObject(data)) {
+            const result = Object
+                .keys(data)
+                .reduce((acc, key) => {
+                // normalize each key of the object to the dest object
+                this.normalizeProperty(data, key, acc);
+                // return the dest object
+                return acc;
+            }, {});
+            // return the normalized result
+            return { result };
+        }
+        return {
+            errors: {
+                data: 'data was not an object but was trying to be normalized as an object',
+            },
+            result: null,
+        };
     }
     /**
      * normalizes non-object data
      * @param data data to normalize
      */
-    normalizePrimitiveType(data) {
-        // primitive types can't actually be normalized
-        // so we just need to cast it to any and return it
+    _normalizePrimitiveType(data) {
+        // primitive types can't actually be normalized (for now)
+        // so we just need to return it
         return { result: data };
     }
     /**
@@ -124,9 +132,8 @@ class Normalizer {
         const srcValue = _.get(source, key);
         // destination key
         const destKey = this.recase(key, this.options.case);
-        // if options.deep == true and the source value is an object
-        // the dest property needs to be a normalized
-        if (_.isObject(srcValue) && this.options.deep) {
+        // if options.deep == true the dest property needs to be a normalized
+        if (this.options.deep) {
             _.set(dest, destKey, this.normalize(srcValue).result);
         }
         // just set the dest property to source value
