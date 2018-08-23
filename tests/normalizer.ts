@@ -126,7 +126,7 @@ describe('normalizer', () => {
                 case: 'kebab',
                 deep: true,
             });
-            const result = normalizer.normalize(data);
+            const result = normalizer.normalize<typeof data, typeof expected>(data);
 
             chai.expect(result.result).to.deep.eq(expected);
         })
@@ -142,7 +142,7 @@ describe('normalizer', () => {
                 case: 'kebab',
                 deep: true,
             });
-            const result = normalizer.normalize(data);
+            const result = normalizer.normalize<typeof data, typeof expected>(data);
 
             chai.expect(result.result).to.deep.eq(expected);
         })
@@ -172,7 +172,7 @@ describe('normalizer', () => {
                 case: 'kebab',
                 deep: true,
             });
-            const result = normalizer.normalize(data3d);
+            const result = normalizer.normalize<typeof data3d, typeof expected3dResult>(data3d);
 
             chai.expect(result.result).to.deep.eq(expected3dResult);
         })
