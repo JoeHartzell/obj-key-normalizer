@@ -3,7 +3,7 @@
 This is a typscript project for normalizing object keys. There are several configurable options (WIP) for modifying how the normalizer works. There are several examples in the 'tests' directory of the project.
 
 # Example
-```js
+```ts
 const source = {
     firstName: 'Joe',
     lastName: 'Hartzell',
@@ -23,13 +23,15 @@ const dest = normalizer.Normalize(source);
 
 // dest object output
 // {
-//     'first-name': 'Joe',
-//     'last-name': 'Hartzell',
-//     'address': {
-//         'line-1': '123 example rd',
-//         'state': 'PA',
-//         'zip-code': '12345'
-//     }
+//      result: {
+//          'first-name': 'Joe',
+//          'last-name': 'Hartzell',
+//          'address': {
+//              'line-1': '123 example rd',
+//              'state': 'PA',
+//              'zip-code': '12345'
+//          }
+//      }
 // }
 ```
 
