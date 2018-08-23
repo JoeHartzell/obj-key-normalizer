@@ -45,7 +45,7 @@ export declare class Normalizer implements INormalizer {
      * NOTE: does not mutate the original data
      * @param data the data to normailze
      */
-    normalize<TSource extends object, TResult>(data: TSource | TSource[]): INormalizationResult<TResult | TResult[] | null>;
+    normalize<TIn, TOut>(data: TIn): INormalizationResult<TOut | null>;
     /**
      * normalizes an array of objects to a new array of objects
      * @param data the array to normalize

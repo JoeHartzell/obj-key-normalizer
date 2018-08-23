@@ -60,23 +60,31 @@ class Normalizer {
     normalizedArray(data) {
         const initial = [];
         const errors = {};
-        // reduce the data in the array
-        const result = data.reduce((acc, value) => {
-            // normalize the current value in the array
-            const normalized = this.normalize(value);
-            // if there are errors we assume the normalization failed
-            if (normalized.errors && normalized.result === null) {
-                _.merge(errors, normalized.errors);
-            }
-            // if there is a result, we need to push it to the accumulator
-            else if (normalized.result != null) {
-                acc.push(normalized.result);
-            }
-            // return the accumulator
-            return acc;
-        }, initial);
-        // return the normalized result
-        return { result, errors };
+        if (_.isArray(data)) {
+            // reduce the data in the array
+            const result = data.reduce((acc, value) => {
+                // normalize the current value in the array
+                const normalized = this.normalize(value);
+                // if there are errors we assume the normalization failed
+                if (normalized.errors && normalized.result === null) {
+                    _.merge(errors, normalized.errors);
+                }
+                // if there is a result, we need to push it to the accumulator
+                else if (normalized.result != null) {
+                    acc.push(normalized.result);
+                }
+                // return the accumulator
+                return acc;
+            }, initial);
+            // return the normalized result
+            return { result, errors };
+        }
+        return {
+            errors: {
+                data: 'data was not an instance of an array',
+            },
+            result: null,
+        };
     }
     /**
      * normalizes an object to a new object
