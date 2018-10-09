@@ -1,3 +1,5 @@
+
+/* tslint:disable */
 import * as mocha from 'mocha';
 import * as chai from 'chai';
 import { describe } from 'mocha';
@@ -18,6 +20,21 @@ describe('normalizer', () => {
             }
         }
 
+        it('should properly handle 0s in the data', () => {
+            const data = {
+                id: 0
+            }
+
+            const normalizer = new Normalizer({
+                case: 'camel',
+                deep: true,
+            });
+
+            const normalized = normalizer.normalize(data);
+
+            chai.expect(normalized.result).to.deep.eq(data);
+        })
+
         it('should not modify nested objects when deep is set to false', () => {
             const normalizer = new Normalizer({
                 case: 'camel',
@@ -35,14 +52,14 @@ describe('normalizer', () => {
                     'line2': 'P.O. Box 19',
                 }
             }
-            const normalized = normalizer.normalize<typeof objectData, typeof expectedResult>(objectData);
+            const normalized = normalizer.normalize(objectData);
 
             chai.expect(normalized.result).to.deep.eq(expectedResult);
         })
 
         it('should return new object with same keys and values, when no options are configured', () => {
             const normalizer = new Normalizer();
-            const normalized = normalizer.normalize<typeof objectData, typeof objectData>(objectData);
+            const normalized = normalizer.normalize(objectData);
     
             chai.expect(normalized.result).to.deep.eq(objectData);
         })
@@ -64,7 +81,7 @@ describe('normalizer', () => {
                     'line2': 'P.O. Box 19',
                 }
             };
-            const normalized = normalizer.normalize<typeof objectData, typeof expectedResult>(objectData);
+            const normalized = normalizer.normalize(objectData);
 
             chai.expect(normalized.result).to.deep.eq(expectedResult);
         })
@@ -86,7 +103,7 @@ describe('normalizer', () => {
                     'line-2': 'P.O. Box 19',
                 }
             }
-            const result = normalizer.normalize<typeof objectData, typeof expectedResult>(objectData);
+            const result = normalizer.normalize(objectData);
 
             chai.expect(result.result).to.deep.eq(expectedResult);
         })
@@ -108,7 +125,7 @@ describe('normalizer', () => {
                     'line_2': 'P.O. Box 19',
                 }
             };
-            const normalized = normalizer.normalize<typeof objectData, typeof expectedResult>(objectData);
+            const normalized = normalizer.normalize(objectData);
 
             chai.expect(normalized.result).to.deep.eq(expectedResult);
         })
@@ -126,7 +143,7 @@ describe('normalizer', () => {
                 case: 'kebab',
                 deep: true,
             });
-            const result = normalizer.normalize<typeof data, typeof expected>(data);
+            const result = normalizer.normalize(data);
 
             chai.expect(result.result).to.deep.eq(expected);
         })
@@ -142,7 +159,7 @@ describe('normalizer', () => {
                 case: 'kebab',
                 deep: true,
             });
-            const result = normalizer.normalize<typeof data, typeof expected>(data);
+            const result = normalizer.normalize(data);
 
             chai.expect(result.result).to.deep.eq(expected);
         })
@@ -172,7 +189,7 @@ describe('normalizer', () => {
                 case: 'kebab',
                 deep: true,
             });
-            const result = normalizer.normalize<typeof data3d, typeof expected3dResult>(data3d);
+            const result = normalizer.normalize(data3d);
 
             chai.expect(result.result).to.deep.eq(expected3dResult);
         })

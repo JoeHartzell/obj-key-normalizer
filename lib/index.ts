@@ -76,7 +76,7 @@ export class Normalizer implements INormalizer {
             _.merge(normalized.errors, errors);
         }
         // other wise we make sure the normalized result exists
-        else if (normalized.result) {
+        else if (normalized.result !== null || normalized.result !== undefined) {
             result = normalized.result;
         }
 
