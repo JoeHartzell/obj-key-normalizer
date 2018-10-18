@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import recase from './utils/recase';
 
 /**
  * string case types
@@ -9,8 +10,18 @@ export type Case = 'kebab' | 'snake' | 'camel';
  * normalization options
  */
 export interface INormalizerOptions {
+    /**
+     * the case type to use when normalizing object keys
+     */
     case?: Case;
+    /**
+     * if the normalizer should normalize nested objects/arrays
+     */
     deep?: boolean;
+    /**
+     * a namespace key to exclude from case normalization
+     */
+    namespaceKey?: string;
 }
 
 /**
@@ -134,7 +145,7 @@ export class Normalizer implements INormalizer {
                     .keys(data)
                     .reduce((acc: any, key) => {
                         // normalize each key of the object to the dest object
-                        this.normalizeProperty(data, key, acc);
+                        this._normalizeProperty(data, key, acc);
                         // return the dest object
                         return acc;
                     }, {});
@@ -168,15 +179,15 @@ export class Normalizer implements INormalizer {
      * @param key source key
      * @param dest destination object
      */
-    private normalizeProperty<TIn>(source: TIn, key: string, dest: object) {
+    private _normalizeProperty<TIn>(source: TIn, key: string, dest: object) {
         // source value
         const srcValue = _.get(source, key);
         // destination key
-        const destKey = this.recase(key, this.options.case);
+        const destKey = this._normalizePropertyKey(key);
 
         // if options.deep == true the dest property needs to be a normalized
         if (this.options.deep) {
-            _.set(dest, destKey, this.normalize<typeof srcValue>(srcValue).result);
+            _.set(dest, destKey, this.normalize(srcValue).result);
         }
         // just set the dest property to source value
         else {
@@ -189,12 +200,27 @@ export class Normalizer implements INormalizer {
      * @param value value to re-case
      * @param newCase the case to change the value to
      */
-    private recase(value: string, newCase?: Case): string {
-        switch (newCase) {
-            case 'kebab': return _.kebabCase(value);
-            case 'snake': return _.snakeCase(value);
-            case 'camel': return _.camelCase(value);
-            default: return value;
+    private _normalizePropertyKey(key: string): string {
+        const newCase = this.options.case;
+
+        // if there is no case option set, we do not have to continue the normalization
+        if (newCase === undefined) {
+            return key;
         }
+
+        // this means we don't need to worry about namespaced keys. just simply recase the value and return it
+        if (this.options.namespaceKey === undefined) {
+            return recase(key, newCase);
+        }
+
+        // otherwise we need to worry about a namespace being on the key.
+        /*
+            to handle this, we need to split the key on the namespace then recase the parts.
+            after recaseing the parts, we have to rejoin them with the namespace.
+        */
+        const keyParts = key.split(this.options.namespaceKey);
+        const normalizedKeyParts = keyParts.map((k) => recase(k, newCase));
+
+        return normalizedKeyParts.join(this.options.namespaceKey);
     }
 }

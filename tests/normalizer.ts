@@ -20,6 +20,81 @@ describe('normalizer', () => {
             }
         }
 
+        it('should respect namespaced object keys if configured too', () => {
+            const normalizer = new Normalizer({
+                case: 'kebab',
+                deep: true,
+                namespaceKey: '/'
+            });
+
+            const data = {
+                'namespace/id': 1,
+                'namespace/nested/helloWorld': {
+                    'namespace/nested/camelCase': 'test',
+                },
+            }
+
+            const expected = {
+                'namespace/id': 1,
+                'namespace/nested/hello-world': {
+                    'namespace/nested/camel-case': 'test',
+                },
+            }
+
+            const normalized = normalizer.normalize(data);
+
+            chai.expect(normalized.result).to.deep.eq(expected);
+        })
+
+        it('configuring a namespaceKey should not effect non-namespaced keys', () => {
+            const normalizer = new Normalizer({
+                case: 'kebab',
+                deep: true,
+                namespaceKey: '/'
+            })
+
+            const expected = {
+                id: 1, 
+                'first-name': 'Joe',
+                'last-name': 'Hartzell',
+                'middle-initial': 'D',
+                address: {
+                    id: 1, 
+                    'line-1': '8791 loosely lane',
+                    'zip-code': 16249,
+                    'line-2': 'P.O. Box 19',
+                }
+            }
+
+            const normalized = normalizer.normalize(objectData);
+
+            chai.expect(normalized.result).to.deep.eq(expected);
+        })
+
+        it('should handle both namespaced keys and non-namespaced keys in the same object', () => {
+            const data = {
+                'person/id': 1,
+                'person/lastName': 'Hartzell',
+                firstName: 'Joe',
+            }
+
+            const expected = {
+                'person/id': 1,
+                'person/last_name': 'Hartzell',
+                first_name: 'Joe',
+            }
+
+            const normalizer = new Normalizer({
+                case: 'snake',
+                deep: true,
+                namespaceKey: '/',
+            })
+
+            const normalized = normalizer.normalize(data);
+
+            chai.expect(normalized.result).to.deep.eq(expected);
+        })
+
         it('should properly handle 0s in the data', () => {
             const data = {
                 id: 0
