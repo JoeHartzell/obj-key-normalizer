@@ -73,6 +73,10 @@ export class Normalizer implements INormalizer {
         if (_.isArray(data)) {
             normalized = this._normalizedArray<TIn>(data);
         }
+        // date is to be considered a primitive type
+        else if (_.isDate(data)) {
+            normalized = this._normalizePrimitiveType(data);
+        }
         // check if the data is an object
         else if (_.isObject(data)) {
             normalized = this._normalizeObject<TIn>(data);

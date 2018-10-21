@@ -6,6 +6,23 @@ import { describe } from 'mocha';
 import { Normalizer } from '../lib';
 
 describe('normalizer', () => {
+    describe('normalize date', () => {
+        it('should not alter the date object', () => {
+            const data = {
+                date: new Date()
+            }
+
+            const normalizer = new Normalizer({
+                case: 'kebab',
+                deep: true,
+            });
+
+            const normalized = normalizer.normalize(data);
+
+            chai.expect(normalized.result).to.deep.eq(data);
+        })
+    })
+
     describe('normalize object', () => {
         const objectData = {
             id: 1, 
