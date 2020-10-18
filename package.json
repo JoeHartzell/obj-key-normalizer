@@ -1,6 +1,6 @@
 {
   "name": "obj-key-normalizer",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Deeply normalizes object keys.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,8 @@
   "scripts": {
     "lint": "node node_modules/tslint/bin/tslint --project . -c tslint.yml",
     "test": "mocha -r ts-node/register tests/**/*.ts --exit",
-    "build": "rimraf dist/dev/* && tsc"
+    "build": "rimraf dist/* && tsc",
+    "prepare": "npm run build"
   },
   "author": "Joe Hartzell",
   "license": "ISC",
