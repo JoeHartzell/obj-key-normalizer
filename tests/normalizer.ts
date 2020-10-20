@@ -1,11 +1,31 @@
 
 /* tslint:disable */
-import * as mocha from 'mocha';
 import * as chai from 'chai';
 import { describe } from 'mocha';
 import { Normalizer } from '../lib';
 
 describe('normalizer', () => {
+	describe('normalize function', () => {
+		it('should not alter function values', () => {
+			const normalizer = new Normalizer({
+				case: 'kebab',
+				deep: true
+			})
+
+			const data = {
+				test: () => {},
+				testAgain: function() {}
+			}
+
+			const { result } = normalizer.normalize(data)
+
+			chai.expect(result).to.deep.eq({
+				test: data.test,
+				'test-again': data.testAgain
+			})
+		})
+	})
+
 	describe('normalize class', () => {
 		it('should not alter class keys', () => {
 			class Foo {
