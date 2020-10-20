@@ -6,6 +6,27 @@ import { describe } from 'mocha';
 import { Normalizer } from '../lib';
 
 describe('normalizer', () => {
+	describe('normalize class', () => {
+		it('should not alter class keys', () => {
+			class Foo {
+				constructor(public firstName: string, public lastName: string) {}
+			}
+
+			const normalizer = new Normalizer({
+				case: 'kebab',
+				deep: true
+			})
+
+			const data = { 
+				test: new Foo('joe', 'hartzell')
+			}
+
+			const { result } = normalizer.normalize(data)
+
+			chai.expect(result).to.deep.eq(data)
+		})
+	})
+
     describe('normalize date', () => {
         it('should not alter the date object', () => {
             const data = {
@@ -23,7 +44,7 @@ describe('normalizer', () => {
         })
     })
 
-    describe('normalize object', () => {
+    describe('normalize plain object', () => {
         const objectData = {
             id: 1, 
             'first-name': 'Joe',

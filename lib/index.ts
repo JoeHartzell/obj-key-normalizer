@@ -69,16 +69,12 @@ export class Normalizer implements INormalizer {
         let normalized: INormalizationResult<any> | null = null;
         let result: any = null;
 
-        // check if the data is an array
-        if (_.isArray(data)) {
-            normalized = this._normalizedArray<TIn>(data);
-        }
-        // date is to be considered a primitive type
-        else if (_.isDate(data)) {
-            normalized = this._normalizePrimitiveType(data);
-        }
+		// check if the data is an array
+		if (_.isArray(data)) {
+			normalized = this._normalizedArray<TIn>(data);
+		}
         // check if the data is an object
-        else if (_.isObject(data)) {
+        else if (_.isPlainObject(data)) {
             normalized = this._normalizeObject<TIn>(data);
         }
         // data must be a primitive type
